@@ -1,6 +1,4 @@
-import { useEffect, useLayoutEffect, useReducer } from 'react';
-import Timer from "./components/Timer";
-import TodoList from "./API/TodoList";
+import React, {memo, useCallback, useEffect, useLayoutEffect, useRef, useState} from 'react';
 
 //Порядок консольлогов
 
@@ -42,8 +40,7 @@ import TodoList from "./API/TodoList";
 //     };
 //   }, [num]);
 //
-//   return
-//   <Child num={num}/>
+//   return <Child num={num}/>
 // }
 //
 //
@@ -73,6 +70,62 @@ import TodoList from "./API/TodoList";
 //   return null
 // }
 
+//memo
+
+//useEffect вызывался один раз, но handler всегда актуальный
+function WindowEvent({event, handler, options}: {event: string, handler: EventListener, options?: EventListenerOptions}) {
+    // const ref = useRef(handler);
+    // console.log(ref.current)
+    // useLayoutEffect(() => {
+    //     ref.current = handler;
+    // }, [handler])
+    // useEffect(() => {
+    //     const fn = (arg:Event) => ref.current(arg)
+    //     console.log('use effect');
+    //     window.addEventListener(event, fn, options);
+    //     return () => {
+    //         window.removeEventListener(event, fn, options);
+    //     }
+    // }, [event, options])
+
+    useEffect(() => {
+        console.log('use effect');
+            window.addEventListener(event, handler, options);
+            return () => {
+                window.removeEventListener(event, handler, options);
+            }
+    }, [event, handler, options])
+    return null;
+}
+
+interface ButtonProps {
+    onClick: React.MouseEventHandler;
+}
+
+const Button = memo(function Button(props: ButtonProps) {
+    const {onClick} = props;
+    console.log('button render')
+    return <button onClick={onClick}>Click me</button>
+});
+
 export default function App() {
-  return <TodoList key={1}/>
+    const [isVisible, setIsVisible] = useState(false);
+    // const ref = useRef(isVisible)
+
+    const onClick = useCallback(() => {
+        setIsVisible(!isVisible);
+    }, [isVisible])
+
+    // const onClick = useCallback(() => {
+    //     ref.current = !ref.current
+    //     setIsVisible(ref.current);
+    // }, [])
+
+    return <>
+        <Button onClick={onClick} />
+        {/*<WindowEvent event='click' handler={() => console.log('click')}/>*/}
+        {isVisible && (
+            <div>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Eius, optio!</div>
+        )}
+    </>
 }
